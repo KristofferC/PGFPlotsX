@@ -122,4 +122,12 @@ function __init__()
                 yerror = Measurements.uncertainty.(y), kwargs...)
         end
     end
+
+    @require PlotUtils="995b91a9-d308-5afd-9ec6-746e21dbc043" begin
+
+    function PGFPlotsX.print_tex(io::IO, c::Symbol) # TODO is this dispatch too wide?  Could we create a ColorGradient type?
+        PGFPlotsX.print_tex(io, (string(c), PlotUtils.cvec(c)))
+    end
+
+    end
 end
