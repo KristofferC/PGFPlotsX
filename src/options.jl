@@ -22,7 +22,10 @@ Contents emitted in `key = value` form, or `key` when `value ≡ nothing`. Examp
 
 ```jldoctest
 julia> PGFPlotsX.Options(:color => "red", :only_marks => nothing)
-[color={red}, only marks]
+[
+    color={red},
+    only marks
+    ]
 ```
 
 The constuctor is not exported but part of the API, for use in packages that depend on
@@ -169,12 +172,20 @@ printed.
 """
 function print_options(io::IO, options::Options; newline = true)
     @unpack dict, print_empty = options
+    iscompact = get(io, :compact, false)
     if isempty(dict)
         print_empty && print(io, "[]")
     else
-        print(io, "[")
-        print_opt(io, options)
-        print(io, "]")
+        if iscompact
+            print(io, "[")
+            print_opt(io, options)
+            print(io, "]")
+        else
+            println(io, "[")
+            print_opt(io, options)
+            println(io)
+            print(io, add_indent("]"))
+        end
     end
     newline ? println(io) : print(io, " ")
 end
@@ -210,17 +221,24 @@ end
 
 function print_opt(io::IO, options::Options)
     @unpack dict = options
+    iscompact = get(io, :compact, false)
     replace_underline(x) = x
-    replace_underline(x::Union{String, Symbol}) = replace(string(x), "_" => " ")
+    replace_underline(x::Union{String, Symbol}) = iscompact ? replace(string(x), "_" => " ") : add_indent(replace(string(x), "_" => " "))
     for (i, (k, v)) in enumerate(dict)
         print_opt(io, replace_underline(k))
-        if v != nothing
+        if v isa Options && !isempty(v.dict) && !iscompact
+            println(io, "={")
+            print_indent(io) do io
+                print_opt(io, v)
+                print(io, add_indent("\n}"))
+            end
+        elseif v != nothing
             print(io, "={")
             print_opt(io, v)
             print(io, "}")
         end
         if i != length(dict)
-          print(io, ", ")
+          iscompact ? print(io, ", ") : println(io, ",")
         end
     end
 end

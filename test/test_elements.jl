@@ -115,13 +115,13 @@ end
                                       [1 NaN;
                                        -Inf 4.0],
                                       ["xx", "yy"],
-                                      [1])) == "table[row sep={\\\\}]\n{\nxx yy \\\\\n1.0 nan \\\\\n\\\\\n-inf 4.0 \\\\\n}"
+                                      [1])) == "table[\nrow sep={\\\\}\n]\n{\nxx yy \\\\\n1.0 nan \\\\\n\\\\\n-inf 4.0 \\\\\n}"
 end
 
 @testset "table file" begin
     path = "somefile.dat"
     @test squashed_repr_tex(Table(@pgf({x = "a", y = "b"}), path)) ==
-        "table[x={a}, y={b}] {$(path)}"
+        "table[\nx={a},\ny={b}\n] {$(path)}"
     @test squashed_repr_tex(Table(path)) == "table {$(path)}"
 end
 
@@ -130,7 +130,7 @@ end
     data2 = Table(x = 1:2, y = 3:4)
     p2 = Plot(false, false, Options(), data2, [raw"\closedcycle"])
     @test squashed_repr_tex(p2) ==
-        "\\addplot\ntable[row sep={\\\\}]\n{\nx y \\\\\n1 3 \\\\\n2 4 \\\\\n}\n\\closedcycle\n;"
+        "\\addplot\ntable[\nrow sep={\\\\}\n]\n{\nx y \\\\\n1 3 \\\\\n2 4 \\\\\n}\n\\closedcycle\n;"
     @test Plot(data2, raw"\closedcycle") ≅ p2
     @test PlotInc(data2, raw"\closedcycle") ≅
         Plot(false, true, Options(), data2, [raw"\closedcycle"])
@@ -139,10 +139,10 @@ end
     @test Plot(data2, raw"\closedcycle") ≅ p2
     # printing incremental w/ options, 2D and 3D
     @test squashed_repr_tex(PlotInc(data2)) ==
-        "\\addplot+\ntable[row sep={\\\\}]\n{\nx y \\\\\n1 3 \\\\\n2 4 \\\\\n}\n;"
+        "\\addplot+\ntable[\nrow sep={\\\\}\n]\n{\nx y \\\\\n1 3 \\\\\n2 4 \\\\\n}\n;"
     @test squashed_repr_tex(@pgf Plot3Inc({xtick = 1:3},
                                           Table(x = 1:2, y = 3:4, z = 5:6))) ==
-        "\\addplot3+[xtick={1,2,3}]\ntable[row sep={\\\\}]\n{\nx y z \\\\\n1 3 5 \\\\\n2 4 6 \\\\\n}\n;"
+        "\\addplot3+[\nxtick={1,2,3}\n]\ntable[\nrow sep={\\\\}\n]\n{\nx y z \\\\\n1 3 5 \\\\\n2 4 6 \\\\\n}\n;"
 end
 
 @testset "printing and indentation" begin
@@ -157,24 +157,35 @@ end
     @test repr_tex(Expression(["x^2", "y^2"])) == "(\n{x^2},\n{y^2})"
     # graphics
     @test repr_tex(@pgf Graphics({ testopt = 1}, "filename")) ==
+        "graphics[\n    testopt={1}\n    ] {filename}\n"
+    @test repr_tex_compact(@pgf Graphics({ testopt = 1}, "filename")) ==
         "graphics[testopt={1}] {filename}\n"
     # coordinates, tables, and plot
     c = Coordinates([(1, 2), (3, 4)])
     @test repr_tex(c) == "coordinates {\n    (1,2)\n    (3,4)\n}\n"
     t = Table(x = 1:2, y = 3:4)
-    @test repr_tex(t) == "table[row sep={\\\\}]\n{\n    x  y  \\\\\n    1  3  \\\\\n    2  4  \\\\\n}\n"
+    @test repr_tex(t) == "table[\n    row sep={\\\\}\n    ]\n{\n    x  y  \\\\\n    1  3  \\\\\n    2  4  \\\\\n}\n"
     @test repr_tex(@pgf Plot({ no_marks }, c)) ==
-        "\\addplot[no marks]\n    coordinates {\n        (1,2)\n        (3,4)\n    }\n    ;\n"
-    @test repr_tex(@pgf Plot({ no_marks }, t, "trailing")) ==
-        "\\addplot[no marks]\n    table[row sep={\\\\}]\n    {\n        x  y  \\\\\n" *
-        "        1  3  \\\\\n        2  4  \\\\\n    }\n    trailing\n    ;\n"
+        "\\addplot[\n    no marks\n    ]\n    coordinates {\n        (1,2)\n        (3,4)\n    }\n    ;\n"
+    r = repr_tex(@pgf Plot({ no_marks }, t, "trailing"))
+    r4 = split(r, " "^4)
+    r8 = split(r, " "^8)
+    ref = "\\addplot[\n    no marks\n    ]\n    table[\n        row sep={\\\\}\n        ]\n    {\n        x  y  \\\\\n" *
+    "        1  3  \\\\\n        2  4  \\\\\n    }\n    trailing\n    ;\n"
+    ref4 = split(ref, " "^4)
+    ref8 = split(ref, " "^8)
+    @test length(r8) == 6
+    @test length(r4) == 18
+    @test length(ref8) == 6
+    @test length(ref4) == 18
+    @test r == ref
     # legend
     @test repr_tex(Legend(["a", "b", "c"])) == "\\legend{{a},{b},{c}}\n"
     l = LegendEntry("a")
     @test repr_tex(l) == "\\addlegendentry {a}\n"
     # axis
     @test repr_tex(@pgf Axis({ optaxis }, Plot({ optplot }, c), l)) ==
-        "\\begin{axis}[optaxis]\n    \\addplot[optplot]\n" *
+        "\\begin{axis}[\n    optaxis\n    ]\n    \\addplot[\n        optplot\n        ]\n" *
         "        coordinates {\n            (1,2)\n            (3,4)\n        }\n" *
         "        ;\n    \\addlegendentry {a}\n\\end{axis}\n"
 end
@@ -205,27 +216,37 @@ end
 
 @testset "vertical and horizontal lines" begin
     @test repr_tex((@pgf VLine({blue}, 9))) ==
-        "\\draw[blue] ({axis cs:9,0}|-{rel axis cs:0,1}) -- ({axis cs:9,0}|-{rel axis cs:0,0});\n"
+        "\\draw[\n    blue\n    ] ({axis cs:9,0}|-{rel axis cs:0,1}) -- ({axis cs:9,0}|-{rel axis cs:0,0});\n"
     @test repr_tex((@pgf HLine({dashed}, 4.0))) ==
-        "\\draw[dashed] ({rel axis cs:1,0}|-{axis cs:0,4.0}) -- ({rel axis cs:0,0}|-{axis cs:0,4.0});\n"
+        "\\draw[\n    dashed\n    ] ({rel axis cs:1,0}|-{axis cs:0,4.0}) -- ({rel axis cs:0,0}|-{axis cs:0,4.0});\n"
 end
 
 @testset "colors" begin
     @test squashed_repr_tex(@pgf { color = RGB(1e-10, 1, 1) }) ==
-        "[color={rgb,1:red,0.0;green,1.0;blue,1.0}]"
+        "[\ncolor={rgb,1:red,0.0;green,1.0;blue,1.0}\n]"
     @test squashed_repr_tex(@pgf { color = HSV(1, 1e-10, 1) }) ==
-        "[color={rgb,1:red,1.0;green,1.0;blue,1.0}]"
+        "[\ncolor={rgb,1:red,1.0;green,1.0;blue,1.0}\n]"
 end
 
 @testset "Axis, SemiLogXAxis, SemiLogYAxis and LogLogAxis inside GroupPlot" begin
     gp = @pgf GroupPlot({group_style={group_size="2 by 2"}},
         Axis(), SemiLogXAxis(), SemiLogYAxis(), LogLogAxis())
     @test repr_tex(gp) == """
-    \\begin{groupplot}[group style={group size={2 by 2}}]
+    \\begin{groupplot}[
+        group style={
+            group size={2 by 2}
+            }
+        ]
         \\nextgroupplot
-        \\nextgroupplot[xmode=log,ymode=normal]
-        \\nextgroupplot[xmode=normal,ymode=log]
-        \\nextgroupplot[xmode=log,ymode=log]
+        \\nextgroupplot[
+            xmode=log,ymode=normal
+            ]
+        \\nextgroupplot[
+            xmode=normal,ymode=log
+            ]
+        \\nextgroupplot[
+            xmode=log,ymode=log
+            ]
     \\end{groupplot}
     """
 end

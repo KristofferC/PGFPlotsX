@@ -24,7 +24,10 @@ julia> c = Coordinates([1, 2, 3], [2, 4, 8]);
 julia> p = @pgf PlotInc({ "very thick", "mark" => "halfcircle" }, c);
 
 julia> print_tex(p); # print_tex can be used to preview the generated .tex
-\addplot+[very thick, mark={halfcircle}]
+\addplot+[
+    very thick,
+    mark={halfcircle}
+    ]
     coordinates {
         (1,2)
         (2,4)
@@ -58,8 +61,17 @@ which is converted to LaTeX as
 
 ```jldoctest p1
 julia> print_tex(a)
-\begin{axis}[axis background/.style={shade, top color={gray}, bottom color={white}}, ymode={log}]
-    \addplot+[smooth]
+\begin{axis}[
+    axis background/.style={
+        shade,
+        top color={gray},
+        bottom color={white}
+        },
+    ymode={log}
+    ]
+    \addplot+[
+        smooth
+        ]
         coordinates {
             (1,2)
             (2,4)
@@ -133,7 +145,14 @@ julia> p["very thick"] = nothing # Set a value-less options;
 julia> delete!(p, "fill");
 
 julia> print_tex(p)
-\addplot+[axis background/.style={shade, top color={gray}, bottom color={white}}, very thick]
+\addplot+[
+    axis background/.style={
+        shade,
+        top color={gray},
+        bottom color={white}
+        },
+    very thick
+    ]
     coordinates {
         (1,2)
         (2,4)
@@ -151,6 +170,14 @@ This allows a disciplined approach to working with complex plots: for example, y
 Another use case is creating orthogonal sets of options, eg one for axis annotations and another one for legends, and merging these as necessary.
 
 ### Extending and combining options
+julia> print_tex(a)
+\begin{axis}[
+    xmin={0},
+    ymax={1},
+    ybar
+    ]
+\end{axis}
+```
 
 Use  `...` to splice an option into another one, e.g.
 
@@ -162,7 +189,11 @@ julia> a = Axis(
        );
 
 julia> print_tex(a)
-\begin{axis}[xmajorgrids, ymajorgrids, title={Foo}]
+\begin{axis}[
+    xmajorgrids,
+    ymajorgrids,
+    title={Foo}
+    ]
 \end{axis}
 
 julia> print_tex(theme) # original is not modified

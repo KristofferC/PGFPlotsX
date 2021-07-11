@@ -33,7 +33,11 @@ julia> @pgf a = Axis({
           PlotInc( Expression("x^2")));
 
 julia> print_tex(a)
-\begin{axis}[xlabel={x}, ylabel={y}, title={Figure}]
+\begin{axis}[
+    xlabel={x},
+    ylabel={y},
+    title={Figure}
+    ]
     \addplot+
         {x^2};
 \end{axis}
@@ -42,7 +46,11 @@ julia> push!(a, PlotInc(Coordinates([1, 2], [3, 4])));
 
 
 julia> print_tex(a)
-\begin{axis}[xlabel={x}, ylabel={y}, title={Figure}]
+\begin{axis}[
+    xlabel={x},
+    ylabel={y},
+    title={Figure}
+    ]
     \addplot+
         {x^2};
     \addplot+
@@ -76,7 +84,13 @@ julia> for (expr, data) in zip(["x^2", "exp(x)"], ["data1.dat", "data2.dat"])
        end;
 
 julia> print_tex(gp)
-\begin{groupplot}[group style={group size={2 by 1}}, height={6cm}, width={6cm}]
+\begin{groupplot}[
+    group style={
+        group size={2 by 1}
+        },
+    height={6cm},
+    width={6cm}
+    ]
     \addplot
         {x^2};
     \addplot
@@ -99,8 +113,16 @@ julia> @pgf for (expr, data) in zip(["x^2"], ["data2.dat"])
        end;
 
 julia> print_tex(gp)
-\begin{groupplot}[group style={group size={1 by 1}}, height={6cm}, width={6cm}]
-    \nextgroupplot[title={Data data2.dat}]
+\begin{groupplot}[
+    group style={
+        group size={1 by 1}
+        },
+    height={6cm},
+    width={6cm}
+    ]
+    \nextgroupplot[
+        title={Data data2.dat}
+        ]
     \addplot
         {x^2};
     \addplot

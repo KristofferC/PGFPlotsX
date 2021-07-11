@@ -2,6 +2,11 @@
 
 "Invoke print_tex with the given arguments, collect the results in a string."
 repr_tex(args...) = print_tex(String, args...)
+function repr_tex_compact(args...)
+    io = IOBuffer()
+    print_tex(IOContext(io, :compact => true), args...)
+    String(take!(io))
+end
 
 """
 Trim lines, merge whitespace to a single space, merge multiple empty lines into

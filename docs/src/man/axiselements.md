@@ -39,7 +39,9 @@ Example:
 julia> p = @pgf PlotInc({ blue }, Table("plotdata/invcum.dat"));
 
 julia> print_tex(p)
-\addplot+[blue]
+\addplot+[
+    blue
+    ]
     table {plotdata/invcum.dat};
 ```
 
@@ -61,7 +63,9 @@ julia> x, y, z = [1, 2, 3], [2, 4, 8], [3, 9, 27];
 julia> p = @pgf Plot3({ very_thick }, Coordinates(x, y, z));
 
 julia> print_tex(p)
-\addplot3[very thick]
+\addplot3[
+    very thick
+    ]
     coordinates {
         (1,2,3)
         (2,4,9)

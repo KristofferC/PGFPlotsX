@@ -37,7 +37,11 @@ julia> t = @pgf Table({x => "Dof", y => "Err"},
                       [:Dof => [1, 2, 4], :Err => [2.0, 1.0, 0.1]]);
 
 julia> print_tex(t)
-table[row sep={\\}, x={Dof}, y={Err}]
+table[
+    row sep={\\},
+    x={Dof},
+    y={Err}
+    ]
 {
     Dof  Err  \\
     1.0  2.0  \\
