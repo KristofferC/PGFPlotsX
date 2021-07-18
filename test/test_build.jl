@@ -20,8 +20,17 @@ is_pdf_file(filename) = is_file_starting_with(filename, b"%PDF")
 is_tex_document(filename) =     # may have a \Require in the first line
     is_file_starting_with(filename, r"\\documentclass\[tikz\]{standalone}", 2)
 
-is_tikz_standalone(filename) =
-    is_file_starting_with(filename, r"\\begin{tikzpicture}")
+function is_tikz_standalone(filename)
+    if !isfile(filename)
+        return false
+    end
+    s = read(filename,String)
+    m = match(r"^([^%].*$)"m,s) # First non-commented non-empty line
+    if isnothing(m)
+        return false
+    end
+    return occursin(r"\\begin{tikzpicture}",m.captures[1])
+end
 
 is_svg_file(filename) = is_file_starting_with(filename, r"<svg .*>", 2)
 
@@ -80,7 +89,6 @@ end
             @test is_pdf_file("$tmp-2.pdf")
 
             let tikz_lines = readlines("$tmp.tikz")
-                @test occursin(r"^\\begin{tikzpicture}.*", tikz_lines[1])
                 last_line = findlast(!isempty, tikz_lines)
                 @test strip(tikz_lines[last_line]) == "\\end{tikzpicture}"
             end

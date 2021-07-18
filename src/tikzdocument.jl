@@ -140,6 +140,11 @@ function print_tex(io::IO, td::TikzDocument; include_preamble::Bool = true)
             print_tex(io, preamble_line, td)
         end
         println(io, "\\begin{document}")
+    else
+        print_tex(io,"% Recommended preamble:")
+        for preamble_line in preamble
+            print_tex(io,replace(preamble_line,r"^"m => s"% "),td)
+        end
     end
     for element in td.elements
         print_tex(io, element, td)
